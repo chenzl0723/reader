@@ -4,7 +4,7 @@ import { resolve } from 'path'
 
 export default defineConfig({
   // 默认按 nginx 子路径部署；部署到根域名的平台（Render 等）时用 VITE_BASE='/' 构建
-  base: process.env.VITE_BASE || '/',
+  base: process.env.VITE_BASE || './',
   plugins: [vue()],
   server: {
     host: '0.0.0.0',
@@ -18,6 +18,7 @@ export default defineConfig({
     }
   },
   build: {
+    outDir: 'reader',
     minify: 'terser',
     terserOptions: {
       compress: {
