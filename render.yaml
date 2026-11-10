@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: reader-static
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./reader
+    envVars:
+      # 静态站部署在根域名，前端资源按 / 构建
+      - key: VITE_BASE
+        value: "/"
+      - key: NODE_VERSION
+        value: "20"
+    headers:
+      - path: /static8/*
+        name: Cache-Control
+        value: "public, max-age=2592000, immutable"
+    routes:
+      # SPA 兜底：/go、/mine/focusCode 等前端路由直接刷新不能 404
+      - type: rewrite
+        source: /*
+        destination: /index.html
