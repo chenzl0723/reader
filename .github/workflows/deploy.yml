@@ -31,6 +31,11 @@ jobs:
       - name: Build project
         run: npm run build
 
+      # GitHub Pages 不支持 SPA rewrite。复制一份 404.html 作为兜底，
+      # 让 /reader/go、/reader/mine/focusCode 这类前端路由刷新后仍能渲染。
+      - name: SPA fallback (404.html)
+        run: cp reader/index.html reader/404.html
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
