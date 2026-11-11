@@ -13,6 +13,49 @@ VITE_BASE=/ npm run build
 
 ---
 
+## 零、GitHub Pages（当前线上，推荐）
+
+线上地址：https://chenzl0723.github.io/reader/
+
+仓库 `chenzl0723/reader` 已配好 Actions：`.github/workflows/deploy.yml` 在每次 push `main` 时
+`npm ci && npm run build`，用 `peaceiris/actions-gh-pages` 把 `reader/`（构建产物）推到 `gh-pages` 分支。
+**GitHub Pages 走的是 `gh-pages` 分支，不是 `main`** —— 所以 `base` 保持默认 `/reader/` 即可，不需要 `VITE_BASE=/`。
+
+仓库 Settings → Pages 的配置必须是：
+
+| 项 | 值 |
+| --- | --- |
+| Source | Deploy from a branch |
+| Branch | `gh-pages` |
+| Folder | `/ (root)` |
+
+> 若误设成 `main` / root，Pages 会把 Vite 源码当 Jekyll 站发布，根页面引用 `/src/main.js`，白屏。
+
+### SPA 路由兜底
+
+Pages 没有 nginx 的 `try_files`，工作流里已加一步：
+
+```yaml
+- name: SPA fallback (404.html)
+  run: cp reader/index.html reader/404.html
+```
+
+`404.html` 与 `index.html` 同内容 → `/reader/go?xxx` 这类深层链接刷新后仍由前端路由接管
+（HTTP 状态仍是 404，但浏览器能正常渲染）。**改动 `index.html` 入口时不要漏掉这步。**
+
+### 更新与自查
+
+```bash
+git add -A && git commit -m "xxx" && git push    # 自动构建发布，链接不变
+
+BASE=https://chenzl0723.github.io/reader
+curl -I $BASE/                                  # 200 text/html
+curl -s $BASE/static8/js/main.*.js -o /dev/null -w '%{http_code}\n'   # 200
+curl -s $BASE/go | head -3                      # 返回 index.html 内容
+```
+
+---
+
 ## 一、推到 GitHub
 
 Render 只支持 GitHub / GitLab / Bitbucket，不能直连 Gitee。在 GitHub 建空仓库后：
